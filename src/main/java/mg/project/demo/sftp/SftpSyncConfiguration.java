@@ -23,13 +23,16 @@ import java.io.IOException;
 public class SftpSyncConfiguration {
 
     @Autowired
+    private SftpConfig sftpConfig;
+
+    @Autowired
     private SftpService sftpService;
 
     @Bean
     public SftpInboundFileSynchronizer synchronizer() {
         SftpInboundFileSynchronizer sftpInboundFileSynchronizer = new SftpInboundFileSynchronizer(sftpService.getFactory());
         sftpInboundFileSynchronizer.setDeleteRemoteFiles(true);
-        sftpInboundFileSynchronizer.setRemoteDirectory(FileServiceImpl.DIRECTORY + "/done");
+        sftpInboundFileSynchronizer.setRemoteDirectory(sftpConfig.getUser() + FileServiceImpl.DIRECTORY);
         sftpInboundFileSynchronizer.setFilter(new SftpSimplePatternFileListFilter("*.txt"));
         return sftpInboundFileSynchronizer;
     }

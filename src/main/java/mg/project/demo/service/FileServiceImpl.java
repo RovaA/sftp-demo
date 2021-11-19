@@ -16,10 +16,13 @@ import java.io.InputStream;
 @Service
 public class FileServiceImpl implements FileService {
 
-    public static final String DIRECTORY = "/sftp_user/upload";
+    public static final String DIRECTORY = "/upload";
 
     @Autowired
     private SftpService sftpService;
+
+    @Autowired
+    private SftpConfig sftpConfig;
 
     @Autowired
     private ResourceLoader resourceLoader;
@@ -29,7 +32,7 @@ public class FileServiceImpl implements FileService {
 
         InputStream resourceAsStream = resourceLoader.getResource("classpath:mytextfile.txt").getInputStream();
 
-        session.write(resourceAsStream, DIRECTORY + "/mynewfile.txt");
+        session.write(resourceAsStream, this.getDirectory() + "/mynewfile.txt");
         session.close();
     }
 
@@ -37,9 +40,13 @@ public class FileServiceImpl implements FileService {
         SftpSession session = sftpService.getSession();
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        session.read(DIRECTORY + "/mynewfile.txt", outputStream);
+        session.read(this.getDirectory() + "/mynewfile.txt", outputStream);
         session.close();
         return outputStream;
+    }
+
+    private String getDirectory() {
+        return "/" + sftpConfig.getUser() + DIRECTORY;
     }
 
 }
