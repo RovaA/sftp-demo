@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.expression.common.LiteralExpression;
 import org.springframework.integration.annotation.InboundChannelAdapter;
 import org.springframework.integration.annotation.Poller;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -14,9 +15,12 @@ import org.springframework.integration.core.MessageSource;
 import org.springframework.integration.sftp.filters.SftpSimplePatternFileListFilter;
 import org.springframework.integration.sftp.inbound.SftpInboundFileSynchronizer;
 import org.springframework.integration.sftp.inbound.SftpInboundFileSynchronizingMessageSource;
+import org.springframework.integration.sftp.outbound.SftpMessageHandler;
+import org.springframework.messaging.MessageHandler;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @Slf4j
 @Configuration
@@ -52,6 +56,15 @@ public class SftpSyncConfiguration {
         log.info("File {}", file.getName());
         String content = FileUtils.readFileToString(file, "UTF-8");
         log.info("Content: {}", content);
+    }
+
+    @Bean
+    @ServiceActivator(inputChannel = "upload")
+    public MessageHandler uploadHandler() {
+        SftpMessageHandler messageHandler = new SftpMessageHandler(sftpService.getFactory());
+        messageHandler.setRemoteDirectoryExpression(new LiteralExpression(FileServiceImpl.DIRECTORY));
+        messageHandler.setFileNameGenerator(message -> String.format("mytextfile_%s.txt", LocalDateTime.now()));
+        return messageHandler;
     }
 
 }
