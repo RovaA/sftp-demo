@@ -14,6 +14,7 @@ import org.springframework.integration.annotation.Poller;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.core.MessageSource;
 import org.springframework.integration.sftp.filters.SftpSimplePatternFileListFilter;
+import org.springframework.integration.sftp.gateway.SftpOutboundGateway;
 import org.springframework.integration.sftp.inbound.SftpInboundFileSynchronizer;
 import org.springframework.integration.sftp.inbound.SftpInboundFileSynchronizingMessageSource;
 import org.springframework.integration.sftp.outbound.SftpMessageHandler;
@@ -43,7 +44,7 @@ public class SftpSyncConfiguration {
     }
 
     @Bean
-    @InboundChannelAdapter(channel = "filesuploaded", poller = @Poller(fixedDelay = "5000"))
+    @InboundChannelAdapter(channel = "filesuploaded", poller = @Poller(fixedDelay = "10000"))
     public MessageSource<File> sftpMessageSource() {
         SftpInboundFileSynchronizingMessageSource source = new SftpInboundFileSynchronizingMessageSource(synchronizer());
         source.setLocalDirectory(new File("tmp/incoming"));
@@ -57,6 +58,8 @@ public class SftpSyncConfiguration {
         log.info("File {}", file.getName());
         String content = FileUtils.readFileToString(file, "UTF-8");
         log.info("Content: {}", content);
+        if (file.exists())
+            file.delete();
     }
 
     @Bean
@@ -66,6 +69,12 @@ public class SftpSyncConfiguration {
         messageHandler.setRemoteDirectoryExpression(new LiteralExpression(sftpConfig.getDirectory()));
         messageHandler.setFileNameGenerator(message -> String.format("mytextfile_%s.txt", LocalDateTime.now()));
         return messageHandler;
+    }
+
+    @Bean
+    @ServiceActivator(inputChannel = "filestreat")
+    public MessageHandler uploadMessageHandler() {
+        return new SftpOutboundGateway(sftpService.getFactory(), "ls", sftpConfig.getDirectory());
     }
 
 }
