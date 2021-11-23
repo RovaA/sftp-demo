@@ -8,7 +8,7 @@ import java.io.File;
 @MessagingGateway
 public interface UploadMessageGateway {
 
-    @Gateway(requestChannel = "uploadFile")
+    @Gateway(requestChannel = "filestreat")
     void uploadFile(File file);
 
 }

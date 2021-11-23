@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.expression.common.LiteralExpression;
 import org.springframework.integration.annotation.InboundChannelAdapter;
+import org.springframework.integration.annotation.IntegrationComponentScan;
 import org.springframework.integration.annotation.Poller;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.core.MessageSource;
@@ -36,7 +37,7 @@ public class SftpSyncConfiguration {
     public SftpInboundFileSynchronizer synchronizer() {
         SftpInboundFileSynchronizer sftpInboundFileSynchronizer = new SftpInboundFileSynchronizer(sftpService.getFactory());
         sftpInboundFileSynchronizer.setDeleteRemoteFiles(true);
-        sftpInboundFileSynchronizer.setRemoteDirectory(sftpConfig.getUser() + FileServiceImpl.DIRECTORY);
+        sftpInboundFileSynchronizer.setRemoteDirectory(sftpConfig.getDirectory());
         sftpInboundFileSynchronizer.setFilter(new SftpSimplePatternFileListFilter("*.txt"));
         return sftpInboundFileSynchronizer;
     }
@@ -59,10 +60,10 @@ public class SftpSyncConfiguration {
     }
 
     @Bean
-    @ServiceActivator(inputChannel = "upload")
+    @ServiceActivator(inputChannel = "filestreat")
     public MessageHandler uploadHandler() {
         SftpMessageHandler messageHandler = new SftpMessageHandler(sftpService.getFactory());
-        messageHandler.setRemoteDirectoryExpression(new LiteralExpression(FileServiceImpl.DIRECTORY));
+        messageHandler.setRemoteDirectoryExpression(new LiteralExpression(sftpConfig.getDirectory()));
         messageHandler.setFileNameGenerator(message -> String.format("mytextfile_%s.txt", LocalDateTime.now()));
         return messageHandler;
     }

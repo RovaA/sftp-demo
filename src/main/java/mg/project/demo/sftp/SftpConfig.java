@@ -8,6 +8,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SftpConfig {
 
+    public final String DIRECTORY = "/upload";
+
     @Value("${sftp.host:127.0.0.1}")
     private String host;
 
@@ -19,5 +21,9 @@ public class SftpConfig {
 
     @Value("${sftp.password}")
     private String password;
+
+    public String getDirectory() {
+        return user + DIRECTORY;
+    }
 
 }

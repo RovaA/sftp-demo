@@ -16,8 +16,6 @@ import java.io.InputStream;
 @Service
 public class FileServiceImpl implements FileService {
 
-    public static final String DIRECTORY = "/upload";
-
     @Autowired
     private SftpService sftpService;
 
@@ -46,7 +44,7 @@ public class FileServiceImpl implements FileService {
     }
 
     private String getDirectory() {
-        return "/" + sftpConfig.getUser() + DIRECTORY;
+        return "/" + sftpConfig.getDirectory();
     }
 
 }
