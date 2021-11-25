@@ -4,19 +4,21 @@ pipeline {
 
     stages {
 
+        stage('GetCode') {
+            steps {
+                git 'https://github.com/RovaA/sftp-demo.git'
+            }
+        }
+
         stage('Build') {
             steps {
-                echo 'Building'
+                sh 'mvn clean package'
             }
         }
+
         stage('Test') {
             steps {
-                echo 'Testing'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying'
+                sh 'mvn sonar:sonar -Dsonar.login=e435434531c1ac6a2129c8a80711e4f3efd97161'
             }
         }
 
